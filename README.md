@@ -1,10 +1,8 @@
 # When Vibe Coding Goes Wrong
 
-This is a demo app that shows why spec-driven development matters.
-
-A demo app that shows why spec-driven development matters
-
 This is a simple task tracker that went hilariously wrong—then got fixed the right way. Built to demonstrate how Kiro catches requirements issues before they become production nightmares.
+
+Learn more about Kiro: [kiro.dev](https://kiro.dev)
 
 ## Usage
 
