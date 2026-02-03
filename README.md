@@ -1,10 +1,10 @@
-# Mischievous Todo App
+# When Vibe Coding Goes Wrong
 
-A todo app where the Done button doesn't want to be clicked.
+This is a demo app that shows why spec-driven development matters.
 
-The button runs away, demands multiple clicks, and asks if you're *really* sure. It's what happens when you vibe code "make it more fun" without specs.
+A demo app that shows why spec-driven development matters
 
-Built to demo [Kiro](https://kiro.dev)'s spec-driven development: requirements → design → tasks. Structure without losing the vibes.
+This is a simple task tracker that went hilariously wrong—then got fixed the right way. Built to demonstrate how Kiro catches requirements issues before they become production nightmares.
 
 ## Usage
 
@@ -15,10 +15,21 @@ npm test
 ```
 
 
-## Why Specs?
+## Why Kiro?
 
-Most tools are great at generating code, but Kiro gives structure to the chaos before you write a single line. Vibe coding is fast and fun for prototypes, but it can misinterpret context and require constant guidance on complex tasks. Specs make your intent explicit.
+Vibe coding is fun until it ships. Kiro keeps the fun while fixing the chaos through three key capabilities:
 
-Kiro transforms natural language prompts into structured artifacts: requirements, design documents, and sequenced tasks. This isn't about slowing down—it's about building precise context so agents can fix bugs in minutes, iterate on features faster, and solve tough problems across complex codebases.
+### Specs
+Transform natural language prompts into structured artifacts—requirements, design documents, and sequenced tasks. Specs make your intent explicit so agents can fix bugs in minutes, iterate on features faster, and solve tough problems across complex codebases.
 
-Agentic AI development from prototype to production. [kiro.dev](https://kiro.dev)
+### Hooks
+Automate agent actions based on IDE events. Trigger linting on save, run tests when files change, or kick off custom workflows. Hooks let you build guardrails that keep quality high without manual intervention.
+
+### Steering
+Define standards and context that guide every interaction. Team conventions, project-specific instructions, and useful context live in steering files—so the agent always knows how your team works.
+
+---
+
+Learn more about Kiro: [kiro.dev](https://kiro.dev)
+
+Want to see this in action? Check out the Brno AWS User Summit talk on Feb 5, 2026, Brno, CZ.
