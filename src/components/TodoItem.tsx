@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
-import { useCallback, useRef } from 'react';
+import { useCallback, useState } from 'react';
 import type { Todo } from '../types/todo';
 import { Button } from './ui/button';
 import { Trash2 } from 'lucide-react';
-import { TrollDoneButton } from './TrollDoneButton';
-import type { TrollDoneButtonRef } from './TrollDoneButton';
+import { DoneButton } from './DoneButton';
+import { DeleteConfirmationDialog } from './DeleteConfirmationDialog';
 
 interface TodoItemProps {
   todo: Todo;
@@ -25,17 +25,20 @@ interface TodoItemProps {
  * - 3.2: Animate the item disappearing from the list
  */
 export function TodoItem({ todo, onComplete, onDelete }: TodoItemProps) {
-  const trollButtonRef = useRef<TrollDoneButtonRef>(null);
-  
-  // Memoize the complete handler to prevent infinite loops in TrollDoneButton
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Memoize the complete handler
   const handleComplete = useCallback(() => {
     onComplete(todo.id);
   }, [onComplete, todo.id]);
 
-  // Reset button position when mouse leaves the todo item
-  const handleMouseLeave = useCallback(() => {
-    trollButtonRef.current?.resetPosition();
-  }, []);
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(todo.id);
+  };
 
   return (
     <motion.div
@@ -49,7 +52,6 @@ export function TodoItem({ todo, onComplete, onDelete }: TodoItemProps) {
       }}
       className="flex items-center gap-3 p-4 bg-white dark:bg-black border-2 border-black dark:border-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] transition-all hover:-translate-y-[2px]"
       data-testid={`todo-item-${todo.id}`}
-      onMouseLeave={handleMouseLeave}
     >
       {/* Todo text and status */}
       <div className="flex-1 min-w-0">
@@ -65,22 +67,17 @@ export function TodoItem({ todo, onComplete, onDelete }: TodoItemProps) {
 
       {/* Action buttons */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {/* TrollDoneButton - The intentionally broken "Done" button with troll behaviors */}
-        {/* TROLL: This button moves away on hover, rotates, shrinks, and requires multiple clicks */}
-        {/* TROLL: Only ONE button can be displaced at a time - others return to normal */}
-        {/* Requirement 4.9: When todo is finally marked complete after all Troll_Behavior */}
-        <TrollDoneButton
-          ref={trollButtonRef}
+        {/* DoneButton - Standard button for marking todos as complete */}
+        <DoneButton
           onComplete={handleComplete}
           isCompleted={todo.completed}
-          todoId={todo.id}
         />
         
         {/* Delete button with trash icon */}
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onDelete(todo.id)}
+          onClick={handleDeleteClick}
           aria-label={`Delete "${todo.text}"`}
           className="text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
           data-testid="delete-button"
@@ -88,6 +85,14 @@ export function TodoItem({ todo, onComplete, onDelete }: TodoItemProps) {
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        todoText={todo.text}
+        onConfirm={handleConfirmDelete}
+      />
     </motion.div>
   );
 }

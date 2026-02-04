@@ -120,11 +120,7 @@ describe('TodoList', () => {
   });
 
   describe('Todo Actions', () => {
-    // Note: TrollDoneButton has troll behaviors that require multiple clicks
-    // and confirmation dialogs before calling onComplete. The button doesn't
-    // immediately call onComplete on a single click. Full troll behavior testing
-    // is covered in TrollDoneButton.test.tsx and useTrollBehavior.test.ts
-    it('renders TrollDoneButton for incomplete todos', () => {
+    it('renders DoneButton for incomplete todos', () => {
       const todos: Todo[] = [
         createMockTodo({ id: 'test-id-123', text: 'Test task', completed: false }),
       ];
@@ -133,11 +129,11 @@ describe('TodoList', () => {
       
       render(<TodoList todos={todos} onComplete={onComplete} onDelete={onDelete} />);
       
-      // TrollDoneButton should be present
-      expect(screen.getByTestId('troll-done-button')).toBeInTheDocument();
+      // DoneButton should be present
+      expect(screen.getByTestId('done-button')).toBeInTheDocument();
     });
 
-    it('calls onDelete with todo id when delete button is clicked', async () => {
+    it('calls onDelete with todo id when delete is confirmed', async () => {
       const user = userEvent.setup();
       const todos: Todo[] = [
         createMockTodo({ id: 'delete-id-456', text: 'Task to delete', completed: false }),
@@ -147,7 +143,11 @@ describe('TodoList', () => {
       
       render(<TodoList todos={todos} onComplete={onComplete} onDelete={onDelete} />);
       
+      // Click delete button to open confirmation dialog
       await user.click(screen.getByRole('button', { name: /^delete/i }));
+      
+      // Confirm the deletion in the dialog
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
       
       expect(onDelete).toHaveBeenCalledTimes(1);
       expect(onDelete).toHaveBeenCalledWith('delete-id-456');
@@ -167,7 +167,7 @@ describe('TodoList', () => {
       expect(deleteButtons).toHaveLength(2);
     });
 
-    it('renders TrollDoneButton for each incomplete todo', () => {
+    it('renders DoneButton for each incomplete todo', () => {
       const todos: Todo[] = [
         createMockTodo({ id: 'first-id', text: 'First task', completed: false }),
         createMockTodo({ id: 'second-id', text: 'Second task', completed: false }),
@@ -177,9 +177,9 @@ describe('TodoList', () => {
       
       render(<TodoList todos={todos} onComplete={onComplete} onDelete={onDelete} />);
       
-      // Both incomplete todos should have TrollDoneButton
-      const trollButtons = screen.getAllByTestId('troll-done-button');
-      expect(trollButtons).toHaveLength(2);
+      // Both incomplete todos should have DoneButton
+      const doneButtons = screen.getAllByTestId('done-button');
+      expect(doneButtons).toHaveLength(2);
     });
 
     it('handles delete on multiple todos with correct callbacks', async () => {
@@ -193,9 +193,12 @@ describe('TodoList', () => {
       
       render(<TodoList todos={todos} onComplete={onComplete} onDelete={onDelete} />);
       
-      // Click delete on second todo
+      // Click delete on second todo to open confirmation dialog
       const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
       await user.click(deleteButtons[1]);
+      
+      // Confirm the deletion in the dialog
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
       
       expect(onDelete).toHaveBeenCalledWith('second-id');
     });
@@ -211,7 +214,7 @@ describe('TodoList', () => {
       
       render(<TodoList todos={todos} onComplete={onComplete} onDelete={onDelete} />);
       
-      // TrollDoneButton has aria-label="Mark as complete" (generic, not task-specific)
+      // DoneButton has aria-label="Mark as complete" (generic, not task-specific)
       expect(screen.getByRole('button', { name: /mark as complete/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /delete "Accessible task"/i })).toBeInTheDocument();
     });

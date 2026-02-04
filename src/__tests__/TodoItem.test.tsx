@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TodoItem } from '../components/TodoItem';
-import { TrollButtonProvider } from '../components/TrollButtonContext';
 import type { Todo } from '../types/todo';
 
 // Helper function to create a mock todo
@@ -14,12 +13,10 @@ const createMockTodo = (overrides: Partial<Todo> = {}): Todo => ({
   ...overrides,
 });
 
-// Helper to render TodoItem with required TrollButtonProvider context
+// Helper to render TodoItem
 function renderTodoItem(props: { todo: Todo; onComplete: (id: string) => void; onDelete: (id: string) => void }) {
   return render(
-    <TrollButtonProvider>
-      <TodoItem {...props} />
-    </TrollButtonProvider>
+    <TodoItem {...props} />
   );
 }
 
@@ -68,45 +65,41 @@ describe('TodoItem', () => {
     });
   });
 
-  describe('TrollDoneButton Integration', () => {
-    it('shows TrollDoneButton for incomplete todos', () => {
+  describe('DoneButton Integration', () => {
+    it('shows DoneButton for incomplete todos', () => {
       const todo = createMockTodo({ completed: false });
       const onComplete = vi.fn();
       const onDelete = vi.fn();
 
       renderTodoItem({ todo, onComplete, onDelete });
 
-      // TrollDoneButton renders with data-testid="troll-done-button"
-      expect(screen.getByTestId('troll-done-button')).toBeInTheDocument();
+      // DoneButton renders with data-testid="done-button"
+      expect(screen.getByTestId('done-button')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /mark as complete/i })).toBeInTheDocument();
     });
 
-    it('hides TrollDoneButton for completed todos', () => {
+    it('hides DoneButton for completed todos', () => {
       const todo = createMockTodo({ completed: true });
       const onComplete = vi.fn();
       const onDelete = vi.fn();
 
       renderTodoItem({ todo, onComplete, onDelete });
 
-      // TrollDoneButton should not render when isCompleted is true
-      expect(screen.queryByTestId('troll-done-button')).not.toBeInTheDocument();
+      // DoneButton should not render when isCompleted is true
+      expect(screen.queryByTestId('done-button')).not.toBeInTheDocument();
     });
 
-    it('renders TrollDoneButton with correct props', () => {
+    it('renders DoneButton with correct props', () => {
       const todo = createMockTodo({ id: 'test-todo-123', completed: false });
       const onComplete = vi.fn();
       const onDelete = vi.fn();
 
       renderTodoItem({ todo, onComplete, onDelete });
 
-      // The TrollDoneButton should be present and clickable
-      const trollButton = screen.getByTestId('troll-done-button');
-      expect(trollButton).toBeInTheDocument();
+      // The DoneButton should be present and clickable
+      const doneButton = screen.getByTestId('done-button');
+      expect(doneButton).toBeInTheDocument();
     });
-
-    // Note: TrollDoneButton has troll behaviors that require multiple clicks
-    // and confirmation dialogs before calling onComplete. Full troll behavior
-    // testing is covered in TrollDoneButton.test.tsx and useTrollBehavior.test.ts
   });
 
   describe('Delete Button', () => {
@@ -139,31 +132,90 @@ describe('TodoItem', () => {
 
       expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
     });
+  });
 
-    it('calls onDelete with todo id when delete button is clicked', async () => {
+  describe('Delete Confirmation Flow', () => {
+    /**
+     * Validates: Requirements 1.1
+     * WHEN a user clicks the Delete_Button on a Todo_Item, THE Delete_Confirmation_Dialog SHALL open
+     */
+    it('opens delete confirmation dialog when delete button is clicked', async () => {
       const user = userEvent.setup();
-      const todo = createMockTodo({ id: 'delete-me-456' });
+      const todo = createMockTodo({ text: 'Task to delete' });
       const onComplete = vi.fn();
       const onDelete = vi.fn();
 
       renderTodoItem({ todo, onComplete, onDelete });
 
+      // Click the delete button
       await user.click(screen.getByTestId('delete-button'));
 
+      // Dialog should be open with the todo text
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByText(/Are you sure you want to delete "Task to delete"\?/)).toBeInTheDocument();
+      
+      // onDelete should NOT be called yet
+      expect(onDelete).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Validates: Requirements 2.2
+     * WHEN the user clicks the Confirm_Button, THE Todo_Item SHALL be deleted from the list
+     */
+    it('calls onDelete with todo id when confirming dialog', async () => {
+      const user = userEvent.setup();
+      const todo = createMockTodo({ id: 'delete-me-456', text: 'Task to delete' });
+      const onComplete = vi.fn();
+      const onDelete = vi.fn();
+
+      renderTodoItem({ todo, onComplete, onDelete });
+
+      // Click the delete button to open dialog
+      await user.click(screen.getByTestId('delete-button'));
+
+      // Click the confirm (Delete) button in the dialog
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+      // onDelete should be called with the todo id
       expect(onDelete).toHaveBeenCalledTimes(1);
       expect(onDelete).toHaveBeenCalledWith('delete-me-456');
+    });
+
+    /**
+     * Validates: Requirements 3.2
+     * WHEN the user clicks the Cancel_Button, THE Todo_Item SHALL remain in the list unchanged
+     */
+    it('does not call onDelete when canceling dialog', async () => {
+      const user = userEvent.setup();
+      const todo = createMockTodo({ id: 'keep-me-789', text: 'Task to keep' });
+      const onComplete = vi.fn();
+      const onDelete = vi.fn();
+
+      renderTodoItem({ todo, onComplete, onDelete });
+
+      // Click the delete button to open dialog
+      await user.click(screen.getByTestId('delete-button'));
+
+      // Verify dialog is open
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Click the cancel button in the dialog
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      // onDelete should NOT be called
+      expect(onDelete).not.toHaveBeenCalled();
     });
   });
 
   describe('Accessibility', () => {
-    it('has accessible label for TrollDoneButton', () => {
+    it('has accessible label for DoneButton', () => {
       const todo = createMockTodo({ text: 'Accessible task', completed: false });
       const onComplete = vi.fn();
       const onDelete = vi.fn();
 
       renderTodoItem({ todo, onComplete, onDelete });
 
-      // TrollDoneButton has aria-label="Mark as complete"
+      // DoneButton has aria-label="Mark as complete"
       expect(screen.getByRole('button', { name: /mark as complete/i })).toBeInTheDocument();
     });
 

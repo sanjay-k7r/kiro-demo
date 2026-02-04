@@ -1,5 +1,7 @@
 # When Vibe Coding Goes Wrong
 
+A todo app where the Done button doesn't want to be clicked.
+
 This is a simple task tracker that went hilariously wrong—then got fixed the right way. Built to demonstrate how Kiro catches requirements issues before they become production nightmares.
 
 Learn more about Kiro: [kiro.dev](https://kiro.dev)

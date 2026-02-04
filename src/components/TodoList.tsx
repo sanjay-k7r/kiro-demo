@@ -1,7 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import type { Todo } from '../types/todo';
 import { TodoItem } from './TodoItem';
-import { TrollButtonProvider } from './TrollButtonContext';
 
 interface TodoListProps {
   todos: Todo[];
@@ -26,20 +25,17 @@ export function TodoList({ todos, onComplete, onDelete }: TodoListProps) {
   }
 
   return (
-    // TROLL: Wrap with TrollButtonProvider so only ONE button can be displaced at a time
-    <TrollButtonProvider>
-      <div className="space-y-3" data-testid="todo-list">
-        <AnimatePresence mode="popLayout">
-          {todos.map((todo) => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onComplete={onComplete}
-              onDelete={onDelete}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
-    </TrollButtonProvider>
+    <div className="space-y-3" data-testid="todo-list">
+      <AnimatePresence mode="popLayout">
+        {todos.map((todo) => (
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onComplete={onComplete}
+            onDelete={onDelete}
+          />
+        ))}
+      </AnimatePresence>
+    </div>
   );
 }
